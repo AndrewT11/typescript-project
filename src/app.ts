@@ -5,6 +5,9 @@ class ProjectInput {
     templateElement: HTMLTemplateElement;
     hostElement: HTMLDivElement; //can also be HTMLElement. But since we know that it is a div, we add the specificity anyways.
     element: HTMLFormElement;
+    titleInputElement: HTMLInputElement;
+    descriptionInputElement: HTMLInputElement;
+    peopleInputElement: HTMLInputElement;
 
     constructor() {
         this.templateElement = document.getElementById("project-input")! as HTMLTemplateElement;
@@ -13,7 +16,25 @@ class ProjectInput {
         const importedNode = document.importNode(this.templateElement.content, true); // pass a pointer at template element content. second argument is should this be a deep clone or not. If true, all levels of nesting inside of the template will come along.
 
         this.element = importedNode.firstElementChild as HTMLFormElement;
+        this.element.id = "user-input";
+
+   this.titleInputElement = document.querySelector("#title") as HTMLInputElement;
+        this.descriptionInputElement = document.querySelector("#description") as HTMLInputElement;
+        this.peopleInputElement = document.querySelector("#people") as HTMLInputElement;
+
+        this.configure();
         this.attach();
+
+     
+    }
+
+    private submitHandler(event: Event) {
+        event.preventDefault(); 
+        console.log(this.titleInputElement.value)
+    }
+
+    private configure() {
+        this.element.addEventListener('submit', this.submitHandler.bind(this))
     }
 
     private attach() {
