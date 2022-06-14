@@ -42,7 +42,7 @@ function validate(validatableInput: Validatable) {
     isValid = isValid && validatableInput.value >= validatableInput.min;
   }
   if (validatableInput.max != null && typeof validatableInput.value === 'number') {
-    isValid = isValid && validatableInput.value >= validatableInput.max;
+    isValid = isValid && validatableInput.value <= validatableInput.max;
   }
 
   return isValid;
@@ -81,6 +81,7 @@ class ProjectInput {
       const titleValidatable: Validatable = {
         value: enteredTitle,
         required: true,
+        // minLength: 5,
       }
       const descriptionValidatable: Validatable = {
         value: enteredDescription,
@@ -94,12 +95,16 @@ class ProjectInput {
         max: 5
       }
 
-
       if(
-        validate({value: enteredTitle, required: true, minLength: 5}) &&
-        validate({value: enteredDescription, required: true, minLength: 5}) &&
-        validate({value: enteredPeople, required: true, min: 1, max: 5})
-      )
+        !validate(titleValidatable) ||
+        !validate(descriptionValidatable) ||
+        !validate(peopleValidatable)
+      ) {
+        alert("Invalid Inputs. Try again")
+        return;
+      } else {
+        return [enteredTitle, enteredDescription, +enteredPeople]
+      }
     };
 
     // autobind to be placed here. These will render HTML onto browser upon instantiation. 
