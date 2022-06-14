@@ -95,15 +95,25 @@ class ProjectInput {
         max: 5
       }
 
-      if(
-        !validate(titleValidatable) ||
-        !validate(descriptionValidatable) ||
-        !validate(peopleValidatable)
+    //   if(
+    //     !validate(titleValidatable) ||
+    //     !validate(descriptionValidatable) ||
+    //     !validate(peopleValidatable)
+    //   ) {
+    //     alert("Invalid Inputs. Try again")
+    //     return;
+    //   } else {
+    //     return [enteredTitle, enteredDescription, +enteredPeople]
+    //   }
+    if(
+        validate(titleValidatable) &&
+        validate(descriptionValidatable) &&
+        validate(peopleValidatable)
       ) {
+        return [enteredTitle, enteredDescription, +enteredPeople]
+      } else {
         alert("Invalid Inputs. Try again")
         return;
-      } else {
-        return [enteredTitle, enteredDescription, +enteredPeople]
       }
     };
 
