@@ -1,6 +1,7 @@
 // With this project, I need to render HTML from template, then take information input from input fields, validates the information. listens to click of submit button, then creates a new project (JS object stored in some array) where the array is rendered to the list (li and ul templates) and the entire list is added to the DOM (id="app"). 
 // The reason we have an <template> with li and a <template> with ul is that we are creating a drag and drop list. So the li elements are going to be the drag elements, and we will be dropping into the <ul> list.
 
+// Binding decorator for this in submit handler and binding in general
 function Autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
     const adjDescriptor: PropertyDescriptor = {
@@ -13,6 +14,38 @@ function Autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
     }
     return adjDescriptor;
 
+}
+
+// Validation Decorator
+
+interface Validatable {
+    value: string | number;
+    required?: boolean;
+    minLength?: number;
+    maxLength?: number;
+    min?: number;
+    max?: number;
+}
+
+function validate(validatableInput: Validatable) {
+  let isValid = true;
+  if (validatableInput.required) {
+    isValid = isValid && validatableInput.value.toString().trim().length !== 0;
+  }
+  if (validatableInput.minLength != null && typeof validatableInput.value === 'string') {
+    isValid = isValid && validatableInput.value.length >= validatableInput.minLength;
+  }
+  if (validatableInput.maxLength != null && typeof validatableInput.value === 'string') {
+    isValid = isValid && validatableInput.value.length <= validatableInput.maxLength;
+  }
+  if (validatableInput.min != null && typeof validatableInput.value === 'number') {
+    isValid = isValid && validatableInput.value >= validatableInput.min;
+  }
+  if (validatableInput.max != null && typeof validatableInput.value === 'number') {
+    isValid = isValid && validatableInput.value >= validatableInput.max;
+  }
+
+  return isValid;
 }
 
 class ProjectInput {
@@ -45,12 +78,28 @@ class ProjectInput {
       const enteredDescription = this.descriptionInputElement.value;
       const enteredPeople = this.peopleInputElement.value;    
 
-      if(enteredTitle.trim().length === 0 || enteredDescription.trim().length === 0 || enteredPeople.trim().length === 0) {
-        alert("Invalid input. Please try again.")
-        return;
-      } else {
-        return [enteredTitle, enteredDescription, +enteredPeople]
+      const titleValidatable: Validatable = {
+        value: enteredTitle,
+        required: true,
       }
+      const descriptionValidatable: Validatable = {
+        value: enteredDescription,
+        required: true,
+        minLength: 5,
+      }
+      const peopleValidatable: Validatable = {
+        value: +enteredPeople,
+        required: true,
+        min: 1,
+        max: 5
+      }
+
+
+      if(
+        validate({value: enteredTitle, required: true, minLength: 5}) &&
+        validate({value: enteredDescription, required: true, minLength: 5}) &&
+        validate({value: enteredPeople, required: true, min: 1, max: 5})
+      )
     };
 
     // autobind to be placed here. These will render HTML onto browser upon instantiation. 
