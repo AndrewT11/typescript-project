@@ -3,12 +3,12 @@
 
 // Binding decorator for this in submit handler and binding in general
 function Autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
-    const originalMethod = descriptor.value;
+    const originalDescriptor = descriptor.value;
     const adjDescriptor: PropertyDescriptor = {
         configurable: true,
         enumerable: true,
         get() {
-            const boundFn = originalMethod.bind(this)
+            const boundFn = originalDescriptor.bind(this)
             return boundFn;
         }
     }
@@ -16,7 +16,7 @@ function Autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
 
 }
 
-// Validation Decorator
+// Validation
 
 interface Validatable {
     value: string | number;
@@ -48,6 +48,38 @@ function validate(validatableInput: Validatable) {
   return isValid;
 }
 
+// ProjectList Class. Will render all projects onto a list
+class ProjectList {
+    templateElement: HTMLTemplateElement;
+    hostElement: HTMLDivElement;
+    element: HTMLElement;
+
+    constructor(private type: "active" | 'finished') {
+        this.templateElement = document.getElementById("project-list")! as HTMLTemplateElement;
+        this.hostElement = document.getElementById('app')! as HTMLDivElement;
+
+        const importedNode = document.importNode(this.templateElement.content, true); // pass a pointer at template element content. second argument is should this be a deep clone or not. If true, all levels of nesting inside of the template will come along. 
+
+        this.element = importedNode.firstElementChild as HTMLElement;
+        this.element.id = `${this.type}-projects`;
+
+        this.attach();
+        this.renderContent();
+    }
+
+    private renderContent () {
+        const listId = `${this.type}-projects-list`;
+        this.element.querySelector('ul')!.id = listId;
+        this.element.querySelector('h2')!.textContent = this.type.toUpperCase() + `PROJECTS`;
+    }
+
+    private attach() {
+        this.hostElement.insertAdjacentElement('beforeend', this.element); //insertedAdjacentElement(<where to render>, <what to render>) 
+    }
+}
+
+
+// Project Input Class. Renders form and gathers user inputs
 class ProjectInput {
     templateElement: HTMLTemplateElement;
     hostElement: HTMLDivElement; //can also be HTMLElement. But since we know that it is a div, we add the specificity anyways.
@@ -146,3 +178,5 @@ class ProjectInput {
 }   
 
 const proj1 = new ProjectInput();
+const activeProjList = new ProjectList('active');
+const finishedProjList = new ProjectList('finished');
