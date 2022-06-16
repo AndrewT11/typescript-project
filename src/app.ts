@@ -1,18 +1,16 @@
 // With this project, I need to render HTML from template, then take information input from input fields, validates the information. listens to click of submit button, then creates a new project (JS object stored in some array) where the array is rendered to the list (li and ul templates) and the entire list is added to the DOM (id="app"). 
 // The reason we have an <template> with li and a <template> with ul is that we are creating a drag and drop list. So the li elements are going to be the drag elements, and we will be dropping into the <ul> list.
-
+ 
 class ProjectState {
   private  listeners: any[] = [];
   private projects: any[] = [];
   private static instance: ProjectState;
 
-  private constructor() {
-
-  }
+  private constructor() {}
 
   static getInstance() {
     if (this.instance) {
-      return this.instance
+      return this.instance;
     } 
     this.instance = new ProjectState();
     return this.instance;
@@ -28,7 +26,7 @@ class ProjectState {
       title: title,
       description: description,
       people: people,
-    }
+    };
     this.projects.push(newProject); //pushing our new constructed project object into our projects array
     for (const listenerFn of this.listeners) {
       listenerFn(this.projects.slice()); // using slice will return a new copy of the array
@@ -97,9 +95,10 @@ class ProjectList {
     assignedProjects: any[];
 
     constructor(private type: "active" | 'finished') {
-      this.assignedProjects = [];
         this.templateElement = document.getElementById("project-list")! as HTMLTemplateElement;
         this.hostElement = document.getElementById('app')! as HTMLDivElement;
+        this.assignedProjects = [];
+
 
         const importedNode = document.importNode(this.templateElement.content, true); // pass a pointer at template element content. second argument is should this be a deep clone or not. If true, all levels of nesting inside of the template will come along. 
 
@@ -118,7 +117,7 @@ class ProjectList {
       const listEl = document.getElementById(`${this.type}-projects-list`)! as HTMLUListElement;
       for (const item of this.assignedProjects) {
         const listItem = document.createElement("li");
-        listItem.textContent =item.title
+        listItem.textContent = item.title
         listEl.appendChild(listItem)
       }
     }
@@ -213,7 +212,7 @@ class ProjectInput {
         const userInput = this.gatherUserInput(); // this returns information array of project [title, description, people] line 148.
         if (Array.isArray(userInput) ){
             const [title, description, people] = userInput;
-            projectState.addProject(title, description, people) //neProject is an instance of ProjectState, created by using getInstance method() on line 33.
+            projectState.addProject(title, description, people); //neProject is an instance of ProjectState, created by using getInstance method() on line 33.
             this.clearInput();
         }
     }
@@ -230,7 +229,7 @@ class ProjectInput {
     }
 
     private attach() {
-        this.hostElement.insertAdjacentElement('afterbegin', this.element); //insertedAdjacentElement() 
+      this.hostElement.insertAdjacentElement('afterbegin', this.element);
     }
 }   
 
