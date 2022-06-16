@@ -1,6 +1,45 @@
 // With this project, I need to render HTML from template, then take information input from input fields, validates the information. listens to click of submit button, then creates a new project (JS object stored in some array) where the array is rendered to the list (li and ul templates) and the entire list is added to the DOM (id="app"). 
 // The reason we have an <template> with li and a <template> with ul is that we are creating a drag and drop list. So the li elements are going to be the drag elements, and we will be dropping into the <ul> list.
 
+class ProjectState {
+  private  listeners: any[] = [];
+  private projects: any[] = [];
+  private static instance: ProjectState;
+
+  private constructor() {
+
+  }
+
+  static getInstance() {
+    if (this.instance) {
+      return this.instance
+    } 
+    this.instance = new ProjectState();
+    return this.instance;
+  }
+
+  addListener(listenerFn: Function) {
+    this.listeners.push(listenerFn);
+  }
+
+  addProject(title: string, description: string, people: number) {
+    const newProject = {
+      id: Math.random().toString(),
+      title: title,
+      description: description,
+      people: people,
+    }
+    this.projects.push(newProject); //pushing our new constructed project object into our projects array
+    for (const listenerFn of this.listeners) {
+      listenerFn(this.projects.slice()); // using slice will return a new copy of the array
+    }
+  }
+}
+
+// const newProject = new ProjectState(); // we are instantiating ProjectState so we may have a global constant.
+
+const projectState = ProjectState.getInstance(); // instead of outright creating a new instance, we create a ne instance using ProjectState class method getInstance(). (Return our instance if we have one, or create a new one if we do not have one)
+
 // Binding decorator for this in submit handler and binding in general
 function Autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
     const originalDescriptor = descriptor.value;
@@ -17,7 +56,7 @@ function Autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
 }
 
 // Validation
-
+// remember, interface is just to set a template of what a validatable type is.
 interface Validatable {
     value: string | number;
     required?: boolean;
@@ -27,6 +66,8 @@ interface Validatable {
     max?: number;
 }
 
+// will return true or false. In the function, we define isValid as true. Then, in the validation statements (if statements), we place if property as argument, then isValid will be true if isValid is true AND the statement behind is true. If not, it returns false to whatever we try to validate below.
+// many of the if statements include arguments that will say if this isn't null (!= null) && then the property check given by interface Validatable.
 function validate(validatableInput: Validatable) {
   let isValid = true;
   if (validatableInput.required) {
@@ -53,8 +94,10 @@ class ProjectList {
     templateElement: HTMLTemplateElement;
     hostElement: HTMLDivElement;
     element: HTMLElement;
+    assignedProjects: any[];
 
     constructor(private type: "active" | 'finished') {
+      this.assignedProjects = [];
         this.templateElement = document.getElementById("project-list")! as HTMLTemplateElement;
         this.hostElement = document.getElementById('app')! as HTMLDivElement;
 
@@ -63,8 +106,21 @@ class ProjectList {
         this.element = importedNode.firstElementChild as HTMLElement;
         this.element.id = `${this.type}-projects`;
 
+        projectState.addListener((projects: any[]) => {
+          this.assignedProjects = projects; // overriding assigned projects with new projects
+          this.renderProjects();
+        });
         this.attach();
         this.renderContent();
+    }
+
+    private renderProjects() {
+      const listEl = document.getElementById(`${this.type}-projects-list`)! as HTMLUListElement;
+      for (const item of this.assignedProjects) {
+        const listItem = document.createElement("li");
+        listItem.textContent =item.title
+        listEl.appendChild(listItem)
+      }
     }
 
     private renderContent () {
@@ -74,6 +130,7 @@ class ProjectList {
     }
 
     private attach() {
+      // this.element holds importedNode, which is the content of the template we want to insert. We are attaching all the template content of project list into hostElement, which is the pointer towards the app div that we will be rendering all the info. (basically <div id="root")
         this.hostElement.insertAdjacentElement('beforeend', this.element); //insertedAdjacentElement(<where to render>, <what to render>) 
     }
 }
@@ -153,10 +210,10 @@ class ProjectInput {
     @Autobind
     private submitHandler(event: Event) {
         event.preventDefault();
-        const userInput = this.gatherUserInput();
+        const userInput = this.gatherUserInput(); // this returns information array of project [title, description, people] line 148.
         if (Array.isArray(userInput) ){
             const [title, description, people] = userInput;
-            console.log(title, description, people)
+            projectState.addProject(title, description, people) //neProject is an instance of ProjectState, created by using getInstance method() on line 33.
             this.clearInput();
         }
     }
