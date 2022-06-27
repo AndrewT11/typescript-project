@@ -29,7 +29,7 @@ class ProjectState {
     };
     this.projects.push(newProject); //pushing our new constructed project object into our projects array
     for (const listenerFn of this.listeners) {
-      listenerFn(this.projects.slice()); // using slice will return a new copy of the array
+      listenerFn(this.projects.slice()); // using slice will return a new copy of the array. listenerFn is a function we have not used yet.
     }
   }
 }
@@ -54,7 +54,7 @@ function Autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
 }
 
 // Validation
-// remember, interface is just to set a template of what a validatable type is.
+// remember, interface is just to set a template of what a validatable type is.The validator function will need to have the same properties as it is typed to Validatable. Value will always be required. The other keys are optional, thus have (?).
 interface Validatable {
     value: string | number;
     required?: boolean;
