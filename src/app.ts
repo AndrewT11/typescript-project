@@ -141,18 +141,6 @@ class ProjectList extends Component<HTMLDivElement, HTMLElement> {
       super("project-list", 'app', false, `${type}-projects`);
         this.assignedProjects = [];
         this.element.id = `${this.type}-projects`;
-
-        projectState.addListener((projects: Project[]) => {
-          const relevantProjects = projects.filter(prj => {
-            if (this.type === "active") {
-              return prj.status === ProjectStatus.Active;
-            }
-            return prj.status === ProjectStatus.Finished;
-          })
-
-          this.assignedProjects = relevantProjects; // overriding assigned projects with new projects
-          this.renderProjects();
-        });
         this.renderContent();
     }
 
@@ -167,6 +155,18 @@ class ProjectList extends Component<HTMLDivElement, HTMLElement> {
       }
     }
 
+    configure() {
+      projectState.addListener((projects: Project[]) => {
+        const relevantProjects = projects.filter(prj => {
+          if (this.type === "active") {
+            return prj.status === ProjectStatus.Active;
+          }
+          return prj.status === ProjectStatus.Finished;
+        })
+        this.assignedProjects = relevantProjects; // overriding assigned projects with new projects
+        this.renderProjects();
+      });
+    } // added to correct class ProjectList error. 
     // This is for making the list containers
     renderContent () {
         const listId = `${this.type}-projects-list`;
