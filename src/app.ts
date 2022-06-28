@@ -1,11 +1,28 @@
-// With this project, I need to render HTML from template, then take information input from input fields, validates the information. listens to click of submit button, then creates a new project (JS object stored in some array) where the array is rendered to the list (li and ul templates) and the entire list is added to the DOM (id="app"). 
-// The reason we have an <template> with li and a <template> with ul is that we are creating a drag and drop list. So the li elements are going to be the drag elements, and we will be dropping into the <ul> list.
- 
+// Project Type
+enum ProjectStatus {
+  Active,
+  Finished
+}
+
+class Project {
+  constructor (
+    public id: string,
+    public title: string,
+    public description: string,
+    public people: number,
+    public status: ProjectStatus
+  ) {}
+} 
+
+// Project State Management
+type Listener = (items: Project[]) => void
+
 class ProjectState {
-  private  listeners: any[] = [];
-  private projects: any[] = [];
+  private  listeners: any[] = []; // list of listener functions that should be called when something changes. The idea is when something changes, like adding a new project, we call all listener functions addListener() method below.
+  private projects: Project[] = [];
   private static instance: ProjectState;
 
+  // private constructor to guarantee this is a singleton class
   private constructor() {}
 
   static getInstance() {
@@ -16,17 +33,13 @@ class ProjectState {
     return this.instance;
   }
 
+  // get listener function and add it to listeners array
   addListener(listenerFn: Function) {
     this.listeners.push(listenerFn);
   }
 
   addProject(title: string, description: string, people: number) {
-    const newProject = {
-      id: Math.random().toString(),
-      title: title,
-      description: description,
-      people: people,
-    };
+    const newProject = new Project(Math.random().toString(), title, description, people, ProjectStatus.Active)
     this.projects.push(newProject); //pushing our new constructed project object into our projects array
     for (const listenerFn of this.listeners) {
       listenerFn(this.projects.slice()); // using slice will return a new copy of the array. listenerFn is a function we have not used yet.
@@ -37,6 +50,7 @@ class ProjectState {
 // const newProject = new ProjectState(); // we are instantiating ProjectState so we may have a global constant.
 
 const projectState = ProjectState.getInstance(); // instead of outright creating a new instance, we create a ne instance using ProjectState class method getInstance(). (Return our instance if we have one, or create a new one if we do not have one)
+// We are guranteed to work with the exact same object and will always only have one object of the type in the entire application. We only want to have one state management object for our project, this project state with the singleton constructor.  
 
 // Binding decorator for this in submit handler and binding in general
 function Autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
@@ -91,8 +105,8 @@ function validate(validatableInput: Validatable) {
 class ProjectList {
     templateElement: HTMLTemplateElement;
     hostElement: HTMLDivElement;
-    element: HTMLElement;
-    assignedProjects: any[];
+    element: HTMLElement; // no such thing as a HTMLSectionElement, so we call it HTMLElement. We will be rendering the section here
+    assignedProjects: Project[];
 
     constructor(private type: "active" | 'finished') {
         this.templateElement = document.getElementById("project-list")! as HTMLTemplateElement;
@@ -102,7 +116,7 @@ class ProjectList {
 
         const importedNode = document.importNode(this.templateElement.content, true); // pass a pointer at template element content. second argument is should this be a deep clone or not. If true, all levels of nesting inside of the template will come along. 
 
-        this.element = importedNode.firstElementChild as HTMLElement;
+        this.element = importedNode.firstElementChild as HTMLElement; 
         this.element.id = `${this.type}-projects`;
 
         projectState.addListener((projects: any[]) => {
@@ -113,19 +127,21 @@ class ProjectList {
         this.renderContent();
     }
 
+    // Render projects into the <ul> template above (id="project-list"); Take each project inside assignedProjects [] we created and make a list item out of it. We will display the project title as the textContent displayed in the li. Append the ListItem to the listEl, the box of active or finished products, based on the id type given to it.
     private renderProjects() {
       const listEl = document.getElementById(`${this.type}-projects-list`)! as HTMLUListElement;
-      for (const item of this.assignedProjects) {
+      for (const prjItem of this.assignedProjects) {
         const listItem = document.createElement("li");
-        listItem.textContent = item.title
+        listItem.textContent = prjItem.title
         listEl.appendChild(listItem)
       }
     }
 
+    // This is for making the list containers
     private renderContent () {
         const listId = `${this.type}-projects-list`;
         this.element.querySelector('ul')!.id = listId;
-        this.element.querySelector('h2')!.textContent = this.type.toUpperCase() + `PROJECTS`;
+        this.element.querySelector('h2')!.textContent = this.type.toUpperCase() + ` PROJECTS`;
     }
 
     private attach() {
@@ -215,7 +231,7 @@ class ProjectInput {
         // checks to make sure if userInput is the tuple array we created with title, description and people information.
         if (Array.isArray(userInput) ){
             const [title, description, people] = userInput;
-            projectState.addProject(title, description, people); //neProject is an instance of ProjectState, created by using getInstance method() on line 33.
+            projectState.addProject(title, description, people); //projectState is an instance of class ProjectState, created by using getInstance method() on line 33. We can now use that instance to add the project and have the state managed.
             this.clearInput();
         }
     }
