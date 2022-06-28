@@ -120,7 +120,14 @@ class ProjectList {
         this.element.id = `${this.type}-projects`;
 
         projectState.addListener((projects: Project[]) => {
-          this.assignedProjects = projects; // overriding assigned projects with new projects
+          const relevantProjects = projects.filter(prj => {
+            if (this.type === "active") {
+              return prj.status === ProjectStatus.Active;
+            }
+            return prj.status === ProjectStatus.Finished;
+          })
+
+          this.assignedProjects = relevantProjects; // overriding assigned projects with new projects
           this.renderProjects();
         });
         this.attach();
@@ -130,6 +137,7 @@ class ProjectList {
     // Render projects into the <ul> template above (id="project-list"); Take each project inside assignedProjects [] we created and make a list item out of it. We will display the project title as the textContent displayed in the li. Append the ListItem to the listEl, the box of active or finished products, based on the id type given to it.
     private renderProjects() {
       const listEl = document.getElementById(`${this.type}-projects-list`)! as HTMLUListElement;
+      listEl.innerHTML = '';
       for (const prjItem of this.assignedProjects) {
         const listItem = document.createElement("li");
         listItem.textContent = prjItem.title
