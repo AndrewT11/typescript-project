@@ -15,15 +15,27 @@ class Project {
 } 
 
 // Project State Management
-type Listener = (items: Project[]) => void;
+type Listener<T> = (items: T[]) => void;
 
-class ProjectState {
-  private  listeners: Listener[] = []; // list of listener functions that should be called when something changes. The idea is when something changes, like adding a new project, we call all listener functions addListener() method below.
+class State<T> {
+  protected  listeners: Listener<T>[] = []; // list of listener functions that should be called when something changes. The idea is when something changes, like adding a new project, we call all listener functions addListener() method below.
+
+  // get listener function and add it to listeners array
+  addListener(listenerFn: Listener<T>) {
+    this.listeners.push(listenerFn);
+  }
+
+}
+
+class ProjectState extends State<Project> {
+  
   private projects: Project[] = [];
   private static instance: ProjectState;
 
   // private constructor to guarantee this is a singleton class
-  private constructor() {}
+  private constructor() {
+    super();
+  }
 
   static getInstance() {
     if (this.instance) {
@@ -31,11 +43,6 @@ class ProjectState {
     } 
     this.instance = new ProjectState();
     return this.instance;
-  }
-
-  // get listener function and add it to listeners array
-  addListener(listenerFn: Listener) {
-    this.listeners.push(listenerFn);
   }
 
   addProject(title: string, description: string, people: number) {
@@ -140,19 +147,9 @@ class ProjectList extends Component<HTMLDivElement, HTMLElement> {
     constructor(private type: "active" | 'finished') {
       super("project-list", 'app', false, `${type}-projects`);
         this.assignedProjects = [];
-        this.element.id = `${this.type}-projects`;
-        this.renderContent();
-    }
 
-    // Render projects into the <ul> template above (id="project-list"); Take each project inside assignedProjects [] we created and make a list item out of it. We will display the project title as the textContent displayed in the li. Append the ListItem to the listEl, the box of active or finished products, based on the id type given to it.
-    private renderProjects() {
-      const listEl = document.getElementById(`${this.type}-projects-list`)! as HTMLUListElement;
-      listEl.innerHTML = ''; //we were having a problem with double adding previous projects added to list. This will clear out the list, then rerender the list so that duplicates do not show.
-      for (const prjItem of this.assignedProjects) {
-        const listItem = document.createElement("li");
-        listItem.textContent = prjItem.title
-        listEl.appendChild(listItem)
-      }
+        this.configure();
+        this.renderContent();
     }
 
     configure() {
@@ -173,34 +170,40 @@ class ProjectList extends Component<HTMLDivElement, HTMLElement> {
         this.element.querySelector('ul')!.id = listId;
         this.element.querySelector('h2')!.textContent = this.type.toUpperCase() + ` PROJECTS`;
     }
+
+    // Render projects into the <ul> template above (id="project-list"); Take each project inside assignedProjects [] we created and make a list item out of it. We will display the project title as the textContent displayed in the li. Append the ListItem to the listEl, the box of active or finished products, based on the id type given to it.
+    private renderProjects() {
+      const listEl = document.getElementById(`${this.type}-projects-list`)! as HTMLUListElement;
+      listEl.innerHTML = ''; //we were having a problem with double adding previous projects added to list. This will clear out the list, then rerender the list so that duplicates do not show.
+      for (const prjItem of this.assignedProjects) {
+        const listItem = document.createElement("li");
+        listItem.textContent = prjItem.title
+        listEl.appendChild(listItem)
+      }
+    }
 }
 
 
 // Project Input Class. Renders form and gathers user inputs
-class ProjectInput {
-    templateElement: HTMLTemplateElement;
-    hostElement: HTMLDivElement; //can also be HTMLElement. But since we know that it is a div, we add the specificity anyways.
-    element: HTMLFormElement;
+class ProjectInput extends Component<HTMLDivElement, HTMLFormElement> {
     titleInputElement: HTMLInputElement;
     descriptionInputElement: HTMLInputElement;
     peopleInputElement: HTMLInputElement;
 
     constructor() {
-        this.templateElement = document.getElementById("project-input")! as HTMLTemplateElement;
-        this.hostElement = document.getElementById('app')! as HTMLDivElement;
+      super('project-input', 'app', true, 'user-input')
+      this.titleInputElement = this.element.querySelector("#title") as HTMLInputElement;
+      this.descriptionInputElement = this.element.querySelector("#description") as HTMLInputElement;
+      this.peopleInputElement = this.element.querySelector("#people") as HTMLInputElement;
 
-        const importedNode = document.importNode(this.templateElement.content, true); // pass a pointer at template element content. second argument is should this be a deep clone or not. If true, all levels of nesting inside of the template will come along. 
-
-        this.element = importedNode.firstElementChild as HTMLFormElement; //first child element is the template holding the form. second template is holding list items <li>. 3rd template is holding the list container <ul>
-        this.element.id = "user-input"; 
-
-        this.titleInputElement = this.element.querySelector("#title") as HTMLInputElement;
-        this.descriptionInputElement = this.element.querySelector("#description") as HTMLInputElement;
-        this.peopleInputElement = this.element.querySelector("#people") as HTMLInputElement;
-
-        this.configure(); // eventListener that triggers submitHandler(event)
-        this.attach();
+      this.configure(); // eventListener that triggers submitHandler(event)
     }
+
+    configure() {
+      this.element.addEventListener('submit', this.submitHandler)
+    } 
+
+    renderContent() {}
 
     // gather user inputs and validate them. code for validation above around line 69
     private gatherUserInput(): [string, string, number] | void {
@@ -265,15 +268,6 @@ class ProjectInput {
         this.titleInputElement.value = '';
         this.descriptionInputElement.value = '';
         this.peopleInputElement.value = '';
-    }
-
-
-    private configure() {
-        this.element.addEventListener('submit', this.submitHandler)
-    }
-
-    private attach() {
-      this.hostElement.insertAdjacentElement('afterbegin', this.element);
     }
 }   
 
