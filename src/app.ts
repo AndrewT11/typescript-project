@@ -102,7 +102,8 @@ function validate(validatableInput: Validatable) {
   return isValid;
 }
 // Component Base Class
-class Component <T extends HTMLElement, U extends HTMLElement> {
+// Abstract added before class Component so it may not be instantiated
+abstract class Component <T extends HTMLElement, U extends HTMLElement> {
   templateElement: HTMLTemplateElement;
   hostElement: T;
   element: U;
@@ -125,25 +126,20 @@ class Component <T extends HTMLElement, U extends HTMLElement> {
   }
   private attach(insertAtStart: boolean) {
     // this.element holds importedNode, which is the content of the template we want to insert. We are attaching all the template content of project list into hostElement, which is the pointer towards the app div that we will be rendering all the info. (basically <div id="root")
-      this.hostElement.insertAdjacentElement(insertAtStart ? 'afterbegin' : "beforeend", this.element); //insertedAdjacentElement(<where to render>, <what to render>) 
+      this.hostElement.insertAdjacentElement(insertAtStart ? 'afterbegin' : "beforeend", this.element); 
+  }
+
+  abstract configure(): void;
+  abstract renderContent(): void;
 }
 
 // ProjectList Class. Will render all projects onto a list
-class ProjectList {
-    templateElement: HTMLTemplateElement;
-    hostElement: HTMLDivElement;
-    element: HTMLElement; // no such thing as a HTMLSectionElement, so we call it HTMLElement. We will be rendering the section here
+class ProjectList extends Component<HTMLDivElement, HTMLElement> {
     assignedProjects: Project[];
 
     constructor(private type: "active" | 'finished') {
-        this.templateElement = document.getElementById("project-list")! as HTMLTemplateElement;
-        this.hostElement = document.getElementById('app')! as HTMLDivElement;
+      super("project-list", 'app', false, `${type}-projects`);
         this.assignedProjects = [];
-
-
-        const importedNode = document.importNode(this.templateElement.content, true); // pass a pointer at template element content. second argument is should this be a deep clone or not. If true, all levels of nesting inside of the template will come along. 
-
-        this.element = importedNode.firstElementChild as HTMLElement; 
         this.element.id = `${this.type}-projects`;
 
         projectState.addListener((projects: Project[]) => {
@@ -157,7 +153,6 @@ class ProjectList {
           this.assignedProjects = relevantProjects; // overriding assigned projects with new projects
           this.renderProjects();
         });
-        this.attach();
         this.renderContent();
     }
 
@@ -173,15 +168,10 @@ class ProjectList {
     }
 
     // This is for making the list containers
-    private renderContent () {
+    renderContent () {
         const listId = `${this.type}-projects-list`;
         this.element.querySelector('ul')!.id = listId;
         this.element.querySelector('h2')!.textContent = this.type.toUpperCase() + ` PROJECTS`;
-    }
-
-    private attach() {
-      // this.element holds importedNode, which is the content of the template we want to insert. We are attaching all the template content of project list into hostElement, which is the pointer towards the app div that we will be rendering all the info. (basically <div id="root")
-        this.hostElement.insertAdjacentElement('beforeend', this.element); //insertedAdjacentElement(<where to render>, <what to render>) 
     }
 }
 
