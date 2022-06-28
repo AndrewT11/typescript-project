@@ -15,10 +15,10 @@ class Project {
 } 
 
 // Project State Management
-type Listener = (items: Project[]) => void
+type Listener = (items: Project[]) => void;
 
 class ProjectState {
-  private  listeners: any[] = []; // list of listener functions that should be called when something changes. The idea is when something changes, like adding a new project, we call all listener functions addListener() method below.
+  private  listeners: Listener[] = []; // list of listener functions that should be called when something changes. The idea is when something changes, like adding a new project, we call all listener functions addListener() method below.
   private projects: Project[] = [];
   private static instance: ProjectState;
 
@@ -34,7 +34,7 @@ class ProjectState {
   }
 
   // get listener function and add it to listeners array
-  addListener(listenerFn: Function) {
+  addListener(listenerFn: Listener) {
     this.listeners.push(listenerFn);
   }
 
@@ -119,7 +119,7 @@ class ProjectList {
         this.element = importedNode.firstElementChild as HTMLElement; 
         this.element.id = `${this.type}-projects`;
 
-        projectState.addListener((projects: any[]) => {
+        projectState.addListener((projects: Project[]) => {
           this.assignedProjects = projects; // overriding assigned projects with new projects
           this.renderProjects();
         });
