@@ -137,7 +137,7 @@ class ProjectList {
     // Render projects into the <ul> template above (id="project-list"); Take each project inside assignedProjects [] we created and make a list item out of it. We will display the project title as the textContent displayed in the li. Append the ListItem to the listEl, the box of active or finished products, based on the id type given to it.
     private renderProjects() {
       const listEl = document.getElementById(`${this.type}-projects-list`)! as HTMLUListElement;
-      listEl.innerHTML = '';
+      listEl.innerHTML = ''; //we were having a problem with double adding previous projects added to list. This will clear out the list, then rerender the list so that duplicates do not show.
       for (const prjItem of this.assignedProjects) {
         const listItem = document.createElement("li");
         listItem.textContent = prjItem.title
