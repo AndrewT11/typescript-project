@@ -150,24 +150,26 @@ class ProjectInput {
 
         const importedNode = document.importNode(this.templateElement.content, true); // pass a pointer at template element content. second argument is should this be a deep clone or not. If true, all levels of nesting inside of the template will come along. 
 
-        this.element = importedNode.firstElementChild as HTMLFormElement;
-        this.element.id = "user-input";
+        this.element = importedNode.firstElementChild as HTMLFormElement; //first child element is the template holding the form. second template is holding list items <li>. 3rd template is holding the list container <ul>
+        this.element.id = "user-input"; 
 
         this.titleInputElement = this.element.querySelector("#title") as HTMLInputElement;
         this.descriptionInputElement = this.element.querySelector("#description") as HTMLInputElement;
         this.peopleInputElement = this.element.querySelector("#people") as HTMLInputElement;
 
-        this.configure();   
+        this.configure(); // eventListener that triggers submitHandler(event)
         this.attach();
     }
 
+    // gather user inputs and validate them. code for validation above around line 69
     private gatherUserInput(): [string, string, number] | void {
       const enteredTitle = this.titleInputElement.value;
       const enteredDescription = this.descriptionInputElement.value;
       const enteredPeople = this.peopleInputElement.value;    
 
+      // functional validate on line 69
       const titleValidatable: Validatable = {
-        value: enteredTitle,
+        value: enteredTitle,    
         required: true,
         // minLength: 5,
       }
@@ -209,7 +211,8 @@ class ProjectInput {
     @Autobind
     private submitHandler(event: Event) {
         event.preventDefault();
-        const userInput = this.gatherUserInput(); // this returns information array of project [title, description, people] line 148.
+        const userInput = this.gatherUserInput(); // this returns information array of project [title, description, people] line 164.
+        // checks to make sure if userInput is the tuple array we created with title, description and people information.
         if (Array.isArray(userInput) ){
             const [title, description, people] = userInput;
             projectState.addProject(title, description, people); //neProject is an instance of ProjectState, created by using getInstance method() on line 33.
