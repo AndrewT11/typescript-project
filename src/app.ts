@@ -137,6 +137,7 @@ function validate(validatableInput: Validatable) {
 }
 // Component Base Class
 // Abstract added before class Component so it may not be instantiated
+// Component class is used for rendering things on the screen, hence templateElement, hostElement and element
 abstract class Component<T extends HTMLElement, U extends HTMLElement> {
   templateElement: HTMLTemplateElement;
   hostElement: T;
@@ -173,6 +174,28 @@ abstract class Component<T extends HTMLElement, U extends HTMLElement> {
 
   abstract configure(): void;
   abstract renderContent(): void;
+}
+
+// ProjectItem
+class ProjectItem extends Component<HTMLUListElement, HTMLLIElement> {
+  private project: Project;
+
+  constructor(hostId: string, project: Project) {
+    super("single-project", hostId, false, project.id);
+    this.project = project;
+
+    this.configure();
+    this.renderContent();
+  }
+
+  configure() {}
+
+  renderContent() {
+    this.element.querySelector("h2")!.textCotent = this.project.title;
+    this.element.querySelector("h3")!.textCotent =
+      this.project.people.toString();
+    this.element.querySelector("p")!.textCotent = this.project.description;
+  }
 }
 
 // ProjectList Class. Will render all projects onto a list
