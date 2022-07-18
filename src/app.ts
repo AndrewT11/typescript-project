@@ -1,3 +1,5 @@
+// interface Draggable
+// interface DragTarget
 // enum ProjectStatus
 // type Listener
 // class State
@@ -75,6 +77,18 @@ class ProjectState extends State<Project> {
       ProjectStatus.Active
     );
     this.projects.push(newProject); //pushing our new constructed project object into our projects array
+    this.updateListeners();
+  }
+
+  moveProject(projectId: string, newStatus: ProjectStatus) {
+    const project = this.projects.find(prj => prj.id === projectId);
+    if (project && project.status !== newStatus) {
+      project.status = newStatus;
+      this.updateListeners();
+    }
+  }
+
+  private updateListeners() {
     for (const listenerFn of this.listeners) {
       listenerFn(this.projects.slice()); // using slice will return a new copy of the array. listenerFn is a function we have not used yet.
     }
@@ -87,7 +101,7 @@ const projectState = ProjectState.getInstance(); // instead of outright creating
 // We are guranteed to work with the exact same object and will always only have one object of the type in the entire application. We only want to have one state management object for our project, this project state with the singleton constructor.
 
 // Binding decorator for this in submit handler and binding in general
-function Autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
+function autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
   const originalDescriptor = descriptor.value;
   const adjDescriptor: PropertyDescriptor = {
     configurable: true,
@@ -207,9 +221,10 @@ class ProjectItem extends Component<HTMLUListElement, HTMLLIElement> implements 
     this.configure();
     this.renderContent();
   }
-  @Autobind
+  @autobind
   dragStartHandler(event: DragEvent) {
-    console.log(event)
+    event.dataTransfer!.setData('text/plain', this.project.id);
+    event.dataTransfer!.effectAllowed = 'move';
   };
 
   dragEndHandler(_: DragEvent) {
@@ -241,18 +256,31 @@ class ProjectList extends Component<HTMLDivElement, HTMLElement> implements Drag
     this.renderContent();
   }
 
-  @Autobind
+ 
 
   // add background color when dragging over. Adds class droppable to ul
-  dragOverHandler(_: DragEvent) {
-    const listEl = this.element.querySelector('ul')!; 
-    listEl.classList.add('droppable');
+  @autobind
+  dragOverHandler(event: DragEvent) {
+    if (event.dataTransfer && event.dataTransfer.types[0] === 'text/plain') {
+      event.preventDefault();
+      const listEl = this.element.querySelector('ul')!; 
+      listEl.classList.add('droppable');
+    }
+   
   };
-  dropHandler(_: DragEvent) {};
+
+  @autobind
+  dropHandler(event: DragEvent) {
+    const projectId= event.dataTransfer!.getData('text/plain')
+    projectState.moveProject(
+      projectId,
+      this.type === 'active' ? ProjectStatus.Active : ProjectStatus.Finished
+    )
+  };
 
   // remove background color when leaving item. Removes class droppable to ul
 
-  @Autobind
+  @autobind
   dragLeaveHandler(_: DragEvent) {
     const listEl = this.element.querySelector('ul');
     listEl?.classList.remove('droppable')
@@ -367,7 +395,7 @@ class ProjectInput extends Component<HTMLDivElement, HTMLFormElement> {
   }
 
   // autobind to be placed here. These will render HTML onto browser upon instantiation.
-  @Autobind
+  @autobind
   private submitHandler(event: Event) {
     event.preventDefault();
     const userInput = this.gatherUserInput(); // this returns information array of project [title, description, people] line 164.
