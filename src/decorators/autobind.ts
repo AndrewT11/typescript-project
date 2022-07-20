@@ -1,4 +1,3 @@
-namespace App {
     // Binding decorator for this in submit handler and binding in general
 export function autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
     const originalDescriptor = descriptor.value;
@@ -12,4 +11,3 @@ export function autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
     };
     return adjDescriptor;
   }
-}

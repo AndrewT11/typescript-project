@@ -1,9 +1,10 @@
-/// <reference path="base-components.ts"/>
-/// <reference path="../decorators/autobind.ts"/>
-/// <reference path="../utils/validator.ts"/>
-/// <reference path="../state/project-state.ts" />
+import { Component } from "./base-component.js";
+import {Validatable, validate} from '../utils/validator.js';
+import { autobind } from "../decorators/autobind.js";
+import { projectState } from "../state/project-state.js"; 
 
-namespace App {
+
+
     // Project Input Class. Renders form and gathers user inputs
 export class ProjectInput extends Component<HTMLDivElement, HTMLFormElement> {
     titleInputElement: HTMLInputElement;
@@ -31,7 +32,7 @@ export class ProjectInput extends Component<HTMLDivElement, HTMLFormElement> {
   
     renderContent() {}
   
-    // gather user inputs and validate them. code for validation above around line 69
+    // gather user inputs and validate them. code for validation imported through reference above
     private gatherUserInput(): [string, string, number] | void {
       const enteredTitle = this.titleInputElement.value;
       const enteredDescription = this.descriptionInputElement.value;
@@ -95,5 +96,4 @@ export class ProjectInput extends Component<HTMLDivElement, HTMLFormElement> {
       this.descriptionInputElement.value = "";
       this.peopleInputElement.value = "";
     }
-  }
 }

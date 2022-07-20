@@ -1,4 +1,3 @@
-namespace App {
     // Validation
 // remember, interface is just to set a template of what a validatable type is.The validator function will need to have the same properties as it is typed to Validatable. Value will always be required. The other keys are optional, thus have (?).
 export interface Validatable {
@@ -46,4 +45,3 @@ export function validate(validatableInput: Validatable) {
   
     return isValid;
   }
-}

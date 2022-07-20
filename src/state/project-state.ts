@@ -1,4 +1,6 @@
-namespace App {
+import {Project, ProjectStatus } from '../models/project.js';
+    
+    
     // Project State Management
 type Listener<T> = (items: T[]) => void;
 
@@ -59,4 +61,3 @@ export class ProjectState extends State<Project> {
 
 export const projectState = ProjectState.getInstance(); // instead of outright creating a new instance, we create a ne instance using ProjectState class method getInstance(). (Return our instance if we have one, or create a new one if we do not have one)
 // We are guranteed to work with the exact same object and will always only have one object of the type in the entire application. We only want to have one state management object for our project, this project state with the singleton constructor.
-}
