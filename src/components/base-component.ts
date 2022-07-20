@@ -1,7 +1,7 @@
 // Component Base Class
 // Abstract added before class Component so it may not be instantiated
 // Component class is used for rendering things on the screen, h  ence templateElement, hostElement and element
-export abstract class Component<T extends HTMLElement, U extends HTMLElement> {
+export default abstract class Component<T extends HTMLElement, U extends HTMLElement> {
     templateElement: HTMLTemplateElement;
     hostElement: T;
     element: U;

@@ -1,12 +1,12 @@
-import { Component } from "./base-component.js";
-import {Validatable, validate} from '../utils/validator.js';
-import { autobind } from "../decorators/autobind.js";
+import Component from "./base-component.js";
+import * as Validation from '../utils/validator.js';
+import { autobind as Autobind} from "../decorators/autobind.js";
 import { projectState } from "../state/project-state.js"; 
 
 
 
     // Project Input Class. Renders form and gathers user inputs
-export class ProjectInput extends Component<HTMLDivElement, HTMLFormElement> {
+export default class ProjectInput extends Component<HTMLDivElement, HTMLFormElement> {
     titleInputElement: HTMLInputElement;
     descriptionInputElement: HTMLInputElement;
     peopleInputElement: HTMLInputElement;
@@ -39,17 +39,17 @@ export class ProjectInput extends Component<HTMLDivElement, HTMLFormElement> {
       const enteredPeople = this.peopleInputElement.value;
   
       // functional validate on line 69
-      const titleValidatable: Validatable = {
+      const titleValidatable: Validation.Validatable = {
         value: enteredTitle,
         required: true,
         // minLength: 5,
       };
-      const descriptionValidatable: Validatable = {
+      const descriptionValidatable: Validation.Validatable = {
         value: enteredDescription,
         required: true,
         minLength: 5,
       };
-      const peopleValidatable: Validatable = {
+      const peopleValidatable: Validation.Validatable = {
         value: +enteredPeople,
         required: true,
         min: 1,
@@ -67,9 +67,9 @@ export class ProjectInput extends Component<HTMLDivElement, HTMLFormElement> {
       //     return [enteredTitle, enteredDescription, +enteredPeople]
       //   }
       if (
-        validate(titleValidatable) &&
-        validate(descriptionValidatable) &&
-        validate(peopleValidatable)
+        Validation.validate(titleValidatable) &&
+        Validation.validate(descriptionValidatable) &&
+        Validation.validate(peopleValidatable)
       ) {
         return [enteredTitle, enteredDescription, +enteredPeople];
       } else {
@@ -79,7 +79,7 @@ export class ProjectInput extends Component<HTMLDivElement, HTMLFormElement> {
     }
   
     // autobind to be placed here. These will render HTML onto browser upon instantiation.
-    @autobind
+    @Autobind
     private submitHandler(event: Event) {
       event.preventDefault();
       const userInput = this.gatherUserInput(); // this returns information array of project [title, description, people] line 164.
